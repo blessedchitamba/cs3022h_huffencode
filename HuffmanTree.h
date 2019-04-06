@@ -11,6 +11,14 @@
 //using my own student number as namespace
 namespace chtble001 {
 
+	//Struct to compare two nodes
+	 struct Compare  
+ 	 {  
+   		bool compare(const HuffmanNode& a, const HuffmanNode& b) {
+			return a.frequency <= b.frequency;
+		}  
+ 	 };
+
 	class HuffmanTree {
 		/*This class is responsible for creating the tree structure and holds the pointer to the 
 		root node of the tree. It also has all the other associated methods:
@@ -26,9 +34,10 @@ namespace chtble001 {
 
 		private:  //private members
 			std::shared_ptr<HuffmanNode> root;       //root node of the tree
-			std::priority_queue<HuffmanNode> queue;  //to store the nodes in ascending order
+			std::priority_queue<HuffmanNode, vector<HuffmanNode>, Compare> queue;  //to store the nodes in ascending order
 			std::unordered_map<char, int> huffmap;       //contains key value pairs of each char from the input file
 														 //and its frequency
+			HuffmanNode left, right;
 
 		public:
 			//Default constructor
@@ -53,13 +62,22 @@ namespace chtble001 {
 			//It does both creating and pushing the nodes.
 			void loadQueue( std::priority_queue<HuffmanNode> & queue, std::unordered_map<char, int> & huffmap );
 
+			//no argument version
+			void HuffmanTree::loadQueue();
+
 			//Function to compare two nodes to determine their position in the queue
 			bool compare(const HuffmanNode& a, const HuffmanNode& b);
 
 			//Function to build the tree using the nodes in the queue using the compare function
 			bool buildTree(std::shared_ptr<HuffmanNode> & root, std::priority_queue<HuffmanNode> & queue);
 
+			//no argument version
+			bool HuffmanTree::buildTree();
+
+
 	};
+
+
 }
 
 #endif
