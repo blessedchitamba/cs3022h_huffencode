@@ -1,70 +1,108 @@
-/*the driver file for the huffencode application
-  It will do the file I/O, loading of the huffmap with
-  character sequences, as well as the bit encoding
-*/
+//Driver file for the Huffman Encoder application. 
 
 #include <fstream>  // Needed for file stream objects
 #include <iostream> // Needed for console stream objects
 #include <sstream>  // Needed for string stream objects
 #include <string>   // Needed for strings
-#include <vector>   // Needed for the vector container
+#include <iterator>  //Needed for the iterator
+#include <cstdlib>
+#include <math.h>
+#include <memory>
+#include <vector>
+#include <queue>
 #include <unordered_map>
-#include "HuffmanTree.h"  // the file containing the functions
+
+#include "HuffmanTree.h"
+
 
 using namespace std;
 using namespace chtble001;
 
-unordered_map<char, int> makeMap(string filename);
 
-int main(int argc, char * argv[])
-{
-	//get input and output file from arguments
-	string inputFile = argv[1];
-	string outputFile = argv[2];
-
-	cout << "Building unordered map of character sequences..." << endl;
-
-	//call makeMap to make the map and create the tree object
-	HuffmanTree huffTree = new HuffmanTree(makeMap(inputFile));
-	huffTree.loadQueue();
-	huffTree.buildTree();
-
-}  //End of main
-
-//method to make the huffmap
-unordered_map<char, int> makeMap(string filename) {
-	unordered_map<char, int> huffmap;
-	bool charExists;  //boolean to indicate if the char is in the map already
-
-	//open the file and read byte by byte
-	char ch;  //to store each char
-	ifstream ifs(filename, fstream::in);
-	while(!ifs.eof()){
-		//noskipws: read one char at a time and dont terminate at white space
-		while (ifs >> noskipws >> ch) {
-	    	//if the char is a whitespace then ignore
-			if(char == " ") {continue; }
-			else {
-				//else check if the value is not in the map already
-				 for(const auto& n: huffmap){
-            		if(n.first == ch) {charExists = true; }
-        		 }
-
-        		 //if charExists is not true, create new entry, else add 1 to the existing frequency
-        		 if(charExists) {
-        		 	huffmap[ch] += 1;
-        		 }
-        		 else {
-        		 	huffmap[ch] = 1;
-        		 }
-			}
-		}
-	}
-
-	ifs.close();
-
-	cout << "Loaded character frequencies into huffmap." << endl;
-	cout << "Frequency of 'a' is " << map['a'] << endl;
-	cout << "Frequency of 'd' is " << map['d'] << endl;
-	return huffmap;
+//Construct the priority queue
+priority_queue<HuffmanNode, vector<HuffmanNode>, Compare> makeQueue(const unordered_map<char, int>& map){
+    priority_queue<HuffmanNode, vector<HuffmanNode>, Compare> queue;
+    for(const auto& n: map){
+        HuffmanNode node(n.first, n.second);
+        queue.push(node);
+    }
+    return queue;
 }
+
+unordered_map<char, int> makeMap(string inputFile);
+
+//Main method
+int main(int argc, char ** argv){
+
+	//variables
+	string inputFile;
+	string outputFile;
+	priority_queue<HuffmanNode, vector<HuffmanNode>, Compare> queue;
+	unordered_map<char, int> huffmap;
+
+    // take filename for input
+    inputFile = argv[1];
+
+    //count the letter frequencies in the file
+    huffmap = makeMap(inputFile);
+
+    cout << "The huffmap is of size " << huffmap.size() << endl;
+
+    //populate the queue with nodes
+    queue = makeQueue(huffmap);
+
+    //create a HuffmanTree object and put it on the heap using new then build the tree
+    HuffmanTree hufftree;
+    hufftree.buildTree(queue);
+
+    // Build the code table
+    hufftree.generateCodeTable();
+
+    // Output the results of the encoding
+    hufftree.writeToFile(argv[1], argv[2]);
+
+    hufftree.output_bitstream(argv[1], argv[2]);
+    return 0;
+}  //End of main method
+
+//Calculate the frequency of each character in the given file
+unordered_map<char, int> makeMap(string inputFile){
+
+    unordered_map<char, int> charmap;
+    bool charExists;
+
+    // Open the filestream.
+    ifstream ifs;
+    ifs.open(inputFile, ifstream::in);
+
+    // Read file per character
+    char buffer[1];
+    while(!ifs.eof()){
+        charExists = false;
+        ifs.read(buffer, sizeof(buffer[0]));
+        
+        // Check if the value is not already in the map
+        for(const auto& n: charmap){
+            if(n.first == char(buffer[0])) {
+            	charExists = true;
+           	}
+        }
+
+        //if it is on the map already
+        if(charExists){
+            charmap[char(buffer[0])] += 1;
+        } else {
+            charmap[char(buffer[0])] = 1;
+        }
+    }
+
+    charmap[buffer[0]] -= 1;
+
+    ifs.close();
+
+    cout << "Done reading in the input files to map" << endl;
+
+    return charmap;
+}
+
+

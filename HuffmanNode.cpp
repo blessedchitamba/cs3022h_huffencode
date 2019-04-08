@@ -1,33 +1,30 @@
-/*
-  This class represents a single HuffmanNode object which will be used
-  in the building of the HuffmanTree object. Each node holds an int value
-  and an optional char value which can be 0 (only leaf nodes have char values)
-*/
+#include "HuffmanNode.h"
 
-#include <string>
 
-class HuffmanNode {
 
-	friend class HuffmanTree;  //to give HuffmanTree access to node variables
-	//private members
-	private:
-		//std::weak_ptr<HuffmanNode> leftChild;
-		//std::weak_ptr<HuffmanNode> rightChild;
-		char value;
-		int frequency;  //will be 0 if its not a leaf node
+chtble001::HuffmanNode::HuffmanNode(char value, int frequency): value(value), frequency(frequency){
+	//does nothing here
+}
 
-	//public members
-	public:
-		//Constructor
-		HuffmanNode(char value, int frequency, HuffmanNode & left, HuffmanNode & right) : value(value), frequency(frequency){
-			std::shared_ptr<HuffmanNode> leftChild(*left);
-			std::shared_ptr<HuffmanNode> rightChild(*right);
-		}
 
-		//Destructor. Sets weak pointers to null
-		~HuffmanNode() {
-			leftChild = nullptr;
-			rightChild = nullptr;
-		}
 
-};
+chtble001::HuffmanNode::HuffmanNode(int frequency): frequency(frequency){
+    value = '0';
+}
+
+chtble001::HuffmanNode::HuffmanNode(const chtble001::HuffmanNode& rhs): value(rhs.value), frequency(rhs.frequency){
+    left = rhs.left;
+    right = rhs.right;
+}
+
+chtble001::HuffmanNode::~HuffmanNode(){}
+
+bool chtble001::HuffmanNode::operator < (const chtble001::HuffmanNode& other){
+    return (frequency < other.frequency);
+
+}
+
+//comparison method to compar two nodes based on their frequency falues
+bool chtble001::Compare::operator()(chtble001::HuffmanNode& a, chtble001::HuffmanNode& b){
+    return (b < a);
+}
